@@ -149,7 +149,7 @@ elif page == pages[2]:
                 .count()
                 .sort_values("column", ascending=False)
                 .rename({"column": "count"}, axis=1), 
-                x="dtype", y="count", ax=ax)
+                x="dtype", y="count", ax=ax,hue="dtype")
 
     # Ajout des étiquettes sur les barres
     ax.bar_label(ax.containers[0], fontsize=10)
@@ -606,3 +606,69 @@ elif page==pages[9]:
     shap.plots.waterfall(shap_values[0], show=True)
     st.pyplot(plt, bbox_inches='tight', pad_inches=0)
     plt.clf()
+    
+    
+    import streamlit as st
+    import pandas as pd
+    import shap
+    import xgboost as xgb
+    import matplotlib.pyplot as plt
+    from sklearn.model_selection import train_test_split
+
+    # Titre de la page
+    st.title("L’interprétabilité globale et locale du modèle")
+
+    # Paragraphe explicatif
+    st.markdown("""
+                L’interprétabilité des modèles de machine learning est cruciale pour comprendre comment les modèles prennent des décisions, en particulier dans les contextes où les décisions doivent être transparentes et justifiables. SHAP (SHapley Additive exPlanations) est une méthode d'interprétabilité qui peut fournir des explications locales et globales pour les modèles de machine learning.
+             
+    ### Interprétabilité Globale et Locale
+
+    1. **Interprétabilité Globale :**
+    - **Définition :** Elle donne une vue d'ensemble sur le comportement du modèle sur l'ensemble des données. Cela permet de comprendre comment différentes caractéristiques influencent globalement les prédictions du modèle.
+    - **Utilisation :** Utile pour des analyses stratégiques, des audits de modèles et des compréhensions de tendances générales.
+
+    2. **Interprétabilité Locale :**
+    - **Définition :** Elle explique les prédictions du modèle pour des instances individuelles. Cela permet de comprendre pourquoi le modèle a pris une certaine décision pour un cas spécifique.
+    - **Utilisation :** Utile pour des cas particuliers, des diagnostics de modèle et des explications spécifiques pour les utilisateurs finaux.
+
+    ### SHAP : SHapley Additive exPlanations
+
+    SHAP est une approche basée sur la théorie des jeux pour expliquer les sorties des modèles de machine learning. Il se fonde sur les valeurs de Shapley, un concept issu de la théorie des jeux coopératifs, pour attribuer la contribution de chaque caractéristique à la prédiction.
+
+    #### Concepts de Base des SHAP Values
+
+    1. **Valeurs de Shapley :**
+    - **Définition :** Les valeurs de Shapley attribuent de manière équitable la contribution de chaque joueur (dans le contexte des modèles de ML, chaque caractéristique) au gain total (la prédiction).
+    - **Formule :** La valeur de Shapley pour une caractéristique \( i \) est définie comme la moyenne pondérée des contributions marginales de cette caractéristique sur toutes les permutations possibles des caractéristiques.
+
+    2. **Additivité :**
+    - **Principe :** Les SHAP values sont additives, c'est-à-dire que la somme des contributions des caractéristiques plus la valeur de base (moyenne des prédictions sans aucune caractéristique) doit être égale à la prédiction du modèle.
+
+    #### Calcul des SHAP Values
+
+    1. **Valeur de base (Base Value) :**
+    - **Définition :** C’est la moyenne des prédictions lorsque aucune caractéristique n’est incluse dans le modèle.
+
+    2. **Contribution des caractéristiques :**
+    - **Calcul :** Pour chaque caractéristique, calculez la différence de la prédiction en incluant et en excluant cette caractéristique, tout en considérant toutes les combinaisons possibles des autres caractéristiques.
+    - **Formule des SHAP Values :**
+        \[
+        \phi_i = \sum_{S \subseteq N \setminus \{i\}} \frac{|S|! (|N| - |S| - 1)!}{|N|!} [f(S \cup \{i\}) - f(S)]
+        \]
+        où \( \phi_i \) est la valeur de Shapley pour la caractéristique \( i \), \( S \) est un sous-ensemble des caractéristiques, et \( f \) est la fonction de prédiction du modèle.
+
+    ### Interprétation des SHAP Values
+
+    1. **Graphique de Beeswarm (Swarm Plot) :**
+    - **Description :** Visualise l'impact de chaque caractéristique sur la prédiction pour l'ensemble des données. Chaque point représente une valeur SHAP pour une instance.
+    - **Utilité :** Permet de voir quelles caractéristiques influencent le plus les prédictions et dans quelle direction (positive ou négative).
+
+    2. **Diagramme de Dépendance (Dependence Plot) :**
+    - **Description :** Montre la relation entre les valeurs SHAP d'une caractéristique spécifique et ses valeurs réelles.
+    - **Utilité :** Permet de comprendre comment une caractéristique particulière influence les prédictions.
+
+    3. **Explications locales (Force Plot) :**
+    - **Description :** Visualise comment chaque caractéristique influence la prédiction pour une instance spécifique.
+    - **Utilité :** Permet de comprendre pourquoi le modèle a fait une prédiction particulière pour un individu.
+      """)
